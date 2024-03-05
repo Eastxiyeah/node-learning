@@ -7,11 +7,11 @@ const start = (route, handle) => {
       const pathname = url.parse(req.url).pathname
       console.log(`Request for ${pathname} received`);
 
-      route(handle, pathname)
+      route(handle, pathname, res)
 
-      res.writeHead(200, { 'Content-Type': 'text/plain' });
-      res.write('Good job');
-      res.end();
+      // res.writeHead(200, { 'Content-Type': 'text/plain' });
+      // res.write(content);
+      // res.end();
     })
     .listen(8888);
 
