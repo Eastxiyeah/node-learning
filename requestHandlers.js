@@ -1,5 +1,7 @@
 // const exec = require('child_process').exec;
-const querystring = require('querystring')
+const querystring = require('querystring');
+const fs = require('fs');
+const formidable = require('formidable');
 
 exports.start = (res) => {
   console.log("Request handler 'start' was called.");
@@ -48,27 +50,62 @@ exports.start = (res) => {
   const body = `
   <html>
     <head>
-      <meta http-equiv="Content-Type" content="text/html;" charset="utf-8" />
+      <meta http-equiv="Content-Type" content="text/html;" charset="uft-8" />
     </head>
     <body>
-      <form action="/upload" method="post">
-        <textarea name="text" rows="20" cols="60"></textarea>
-        <input type="submit" value="Submit" />
+      <form action="/upload" enctype="multipart/form-data" method="post">
+        <input type="file" name="upload" />
+        <input type="submit" value="Upload" />
       </form>
     </body>
   </html>
-  `
+  `;
 
-  res.writeHead(200, {'Content-Type': 'text/html'})
-  res.write(body)
-  res.end()
+  res.writeHead(200, { 'Content-Type': 'text/html' });
+  res.write(body);
+  res.end();
 };
 
-exports.upload = (res, postData) => {
+exports.upload = (res, req) => {
   console.log("Request handler 'upload' was called.");
   // return 'Hello upload';
 
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.write(`You've sent: ${querystring.parse(postData).text}`);
-  res.end();
+  // res.writeHead(200, { 'Content-Type': 'text/plain' });
+  // res.write(`You've sent: ${querystring.parse(postData).text}`);
+  // res.end();
+
+  const form = new formidable.IncomingForm();
+  console.log('about to parse');
+
+  form.parse(req, (err, fields, files) => {
+    console.log('parsing done');
+    // fs.renameSync(files.upload[0].filepath, `./tmp/test.png`);
+    const sourceFile = files.upload[0].filepath;
+    const destinationFile = "./tmp/test.png";
+
+    fs.copyFileSync(sourceFile, destinationFile);
+
+    fs.unlinkSync(sourceFile) // 删除原始文件
+
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.write('Received image: <br/>');
+    res.write("<image src='/show' width='400px' style='margin: 12px 0;' />");
+    res.write("<a href='/' style='display: block; width:110px; line-height: 32px; height: 32px; text-align: center; background: #1b1b1b; color: #fff; padding: 0 8px; border-radius: 4px; margin: 12px 0; cursor: pointer; text-decoration: none;'>Upload again</a>")
+    res.end();
+  });
+};
+
+exports.show = (res, req) => {
+  console.log("Request handler 'show' was called.");
+  fs.readFile(`${__dirname}/tmp/test.png`, 'binary', (err, file) => {
+    if (err) {
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.write(err + '\n');
+      res.end();
+    } else {
+      res.writeHead(200, { 'Content-Type': 'image/png' });
+      res.write(file, 'binary');
+      res.end();
+    }
+  });
 };
