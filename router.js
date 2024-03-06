@@ -1,9 +1,9 @@
-const route = (handle, pathname, res) => {
+const route = (handle, pathname, res, postData) => {
   console.log(`About to route a request for ${pathname}`)
 
   if(typeof handle[pathname] === 'function') {
     // return handle[pathname]()
-    handle[pathname](res)
+    handle[pathname](res, postData)
   } else {
     console.log(`No request handler for ${pathname}`)
     // return '404 Not Found'

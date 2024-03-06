@@ -12,5 +12,8 @@
     "demo"
   ],
   "author": "East",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "formidable": "^3.5.1"
+  }
 }
